@@ -1,0 +1,7 @@
+{
+  "name": "ระบบบันทึกรายรับช่าง (Technician Daily Income)",
+  "description": "ระบบบันทึกรายรับช่างประจำวัน พร้อมแยกชีท Google Sheets อัตโนมัติ สรุปยอดเงินสด โอน และการจัดการสิทธิ์ Admin / ช่างแต่ละคน",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
