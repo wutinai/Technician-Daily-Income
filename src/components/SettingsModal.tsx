@@ -30,6 +30,14 @@ import {
   Wallet,
   Coins,
   RefreshCw,
+  Image as ImageIcon,
+  Smile,
+  Moon,
+  Sun,
+  Palette,
+  Eye,
+  CheckCircle2,
+  Sliders,
 } from 'lucide-react';
 import { exportBackupJSON, importBackupJSON } from '../services/storage';
 
@@ -66,7 +74,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<SettingsTab>('shop');
 
-  // 1. Form states - Shop
+  // 1. Form states - Shop & Branding
   const [shopName, setShopName] = useState(settings.shopName || 'BARBER & SALON');
   const [shopSubtitle, setShopSubtitle] = useState(settings.shopSubtitle || 'ระบบบัญชีรายรับช่างผมประจำร้าน');
   const [currencySymbol, setCurrencySymbol] = useState(settings.currencySymbol || '฿');
@@ -74,6 +82,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [openingHours, setOpeningHours] = useState(settings.openingHours || '10:00 - 20:00 น.');
   const [themeStyle, setThemeStyle] = useState<'amber' | 'slate' | 'emerald' | 'crimson'>(
     settings.themeStyle || 'amber'
+  );
+
+  // Logo & Header & Black Theme states
+  const [logoType, setLogoType] = useState<'icon' | 'image'>(settings.logoType || 'icon');
+  const [logoImage, setLogoImage] = useState<string>(settings.logoImage || '');
+  const [logoIcon, setLogoIcon] = useState<string>(settings.logoIcon || '✂️');
+  const [logoBgColor, setLogoBgColor] = useState<string>(settings.logoBgColor || '#ea580c');
+  const [logoShape, setLogoShape] = useState<'circle' | 'rounded'>(settings.logoShape || 'rounded');
+  const [headerBgColor, setHeaderBgColor] = useState<string>(settings.headerBgColor || '#1c1917');
+  const [appBgMode, setAppBgMode] = useState<'dark' | 'light'>(settings.appBgMode || 'light');
+  const [showBarberPoleStripe, setShowBarberPoleStripe] = useState<boolean>(
+    settings.showBarberPoleStripe !== false
   );
 
   // 2. Technicians
@@ -131,11 +151,30 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [backupMessage, setBackupMessage] = useState<string | null>(null);
 
+  // Logo file upload handler
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      alert('ขนาดไฟล์รูปภาพต้องไม่เกิน 2MB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result as string;
+      setLogoImage(result);
+      setLogoType('image');
+    };
+    reader.readAsDataURL(file);
+  };
+
   if (!isOpen) return null;
 
   // Save full settings
   const handleSave = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+
+    const isLightHeader = headerBgColor === '#ffffff';
 
     const updated: AppSettings = {
       ...settings,
@@ -145,6 +184,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       phone: phone.trim(),
       openingHours: openingHours.trim(),
       themeStyle,
+
+      // Logo & Theme
+      logoType,
+      logoImage,
+      logoIcon,
+      logoBgColor,
+      logoShape,
+      headerBgColor,
+      headerTextColor: isLightHeader ? 'dark' : 'light',
+      appBgMode,
+      showBarberPoleStripe,
 
       tech1Name: tech1Name.trim() || 'ช่างบอม (Barber)',
       tech1Role: tech1Role.trim() || 'Master Barber',
@@ -240,7 +290,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   const tabs = [
-    { id: 'shop' as SettingsTab, label: 'ข้อมูลร้าน & ธีม', icon: Store },
+    { id: 'shop' as SettingsTab, label: 'โลโก้, ธีมดำ & ข้อมูลร้าน', icon: Store },
     { id: 'technicians' as SettingsTab, label: 'ช่าง & ค่าคอมฯ', icon: Scissors },
     { id: 'security' as SettingsTab, label: 'รหัสผ่าน PIN', icon: Shield },
     { id: 'services' as SettingsTab, label: 'เมนูราคาตัดผม', icon: Sparkles },
@@ -304,101 +354,563 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
         {/* Tab Body Contents */}
         <div className="p-5 md:p-6 overflow-y-auto flex-1 font-sans space-y-5">
-          {/* TAB 1: SHOP & BRANDING */}
+          {/* TAB 1: SHOP, LOGO & BLACK THEME */}
           {activeTab === 'shop' && (
-            <div className="space-y-4 animate-in fade-in duration-150">
-              <div className="border-b border-stone-200 pb-2">
-                <h3 className="font-extrabold text-stone-900 text-sm flex items-center gap-2">
-                  <Store className="w-4 h-4 text-amber-600" />
-                  <span>ข้อมูลร้านตัดผม & อัตลักษณ์ร้าน (Shop & Branding)</span>
-                </h3>
-                <p className="text-xs text-stone-500">
-                  กำหนดชื่อร้าน สโลแกน เวลาทำการ และเบอร์ติดต่อที่จะแสดงบนหัวเอกสาร
-                </p>
+            <div className="space-y-6 animate-in fade-in duration-150">
+              {/* LIVE BRANDING & HEADER PREVIEW */}
+              <div className="bg-stone-900 rounded-2xl p-4 border border-stone-800 shadow-md space-y-2">
+                <div className="flex items-center justify-between text-xs text-stone-400">
+                  <span className="flex items-center gap-1.5 font-bold text-amber-400">
+                    <Eye className="w-4 h-4" />
+                    <span>พรีวิวการแสดงผลจริง (Live Branding & Header Preview)</span>
+                  </span>
+                  <span className="text-[11px] bg-stone-800 px-2.5 py-0.5 rounded-full text-stone-300 font-mono">
+                    {appBgMode === 'dark' ? '⚫ โหมดพื้นหลังสีดำ (Jet Black)' : '⚪ โหมดสว่าง'}
+                  </span>
+                </div>
+
+                {/* Simulated Header */}
+                <div
+                  style={{ backgroundColor: headerBgColor }}
+                  className="rounded-xl border border-stone-700/60 overflow-hidden shadow-inner transition-colors"
+                >
+                  {showBarberPoleStripe && (
+                    <div className="h-1 w-full bg-gradient-to-r from-red-600 via-white via-blue-600 via-white to-red-600 opacity-80" />
+                  )}
+                  <div className="p-3 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      {/* Logo Preview */}
+                      {logoType === 'image' && logoImage ? (
+                        <img
+                          src={logoImage}
+                          alt="Shop Logo"
+                          className={`w-11 h-11 object-cover ${
+                            logoShape === 'circle' ? 'rounded-full' : 'rounded-2xl'
+                          } border-2 border-amber-400/50 shadow-md bg-stone-900 shrink-0`}
+                        />
+                      ) : (
+                        <div
+                          style={{ backgroundColor: logoBgColor }}
+                          className={`w-11 h-11 ${
+                            logoShape === 'circle' ? 'rounded-full' : 'rounded-2xl'
+                          } flex items-center justify-center text-stone-950 shadow-md shrink-0 border border-white/30 text-xl font-bold`}
+                        >
+                          {logoIcon || '✂️'}
+                        </div>
+                      )}
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`font-black text-sm md:text-base tracking-tight ${
+                              headerBgColor === '#ffffff' ? 'text-stone-900' : 'text-stone-100'
+                            }`}
+                          >
+                            {shopName || 'BARBER & SALON'}
+                          </span>
+                          <span className="text-[9px] px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 font-bold">
+                            Barbershop
+                          </span>
+                        </div>
+                        <p
+                          className={`text-[10px] ${
+                            headerBgColor === '#ffffff' ? 'text-stone-600' : 'text-stone-400'
+                          }`}
+                        >
+                          {shopSubtitle || 'ระบบบัญชีรายรับช่างผมประจำร้าน'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="hidden sm:flex items-center gap-2 text-[10px]">
+                      <span className="px-2 py-1 rounded-lg bg-stone-800 text-stone-300 border border-stone-700">
+                        {phone || '081-234-5678'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
-                    ชื่อร้าน (Shop Name):
-                  </label>
-                  <input
-                    type="text"
-                    value={shopName}
-                    onChange={(e) => setShopName(e.target.value)}
-                    className="w-full px-3 py-2 border border-stone-300 rounded-xl text-xs font-bold focus:ring-2 focus:ring-amber-500 bg-white"
-                    placeholder="เช่น VINTAGE BARBER & SALON"
-                  />
+              {/* SECTION A: แก้ไขและเปลี่ยน LOGO ร้าน */}
+              <div className="bg-amber-50/50 border border-amber-200/80 rounded-2xl p-4 md:p-5 space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-amber-200 pb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-800 flex items-center justify-center">
+                      <Scissors className="w-4 h-4 text-amber-700 font-bold" />
+                    </div>
+                    <div>
+                      <h4 className="font-extrabold text-stone-900 text-sm">
+                        1. แก้ไขและเปลี่ยนโลโก้ร้าน (Custom Logo)
+                      </h4>
+                      <p className="text-xs text-stone-600">
+                        เลือกใช้ไอคอน Emoji หรืออัปโหลดไฟล์รูปภาพโลโก้ของคุณเอง
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Logo Type Selector */}
+                  <div className="flex items-center bg-stone-200/80 p-0.5 rounded-xl text-xs font-bold">
+                    <button
+                      type="button"
+                      onClick={() => setLogoType('icon')}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                        logoType === 'icon'
+                          ? 'bg-amber-600 text-white shadow-xs'
+                          : 'text-stone-700 hover:text-stone-900'
+                      }`}
+                    >
+                      <Smile className="w-3.5 h-3.5" />
+                      <span>ไอคอน / Emoji</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setLogoType('image')}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                        logoType === 'image'
+                          ? 'bg-amber-600 text-white shadow-xs'
+                          : 'text-stone-700 hover:text-stone-900'
+                      }`}
+                    >
+                      <ImageIcon className="w-3.5 h-3.5" />
+                      <span>รูปภาพโลโก้ร้าน (Image)</span>
+                    </button>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
-                    คำอธิบาย / สโลแกนร้าน:
-                  </label>
-                  <input
-                    type="text"
-                    value={shopSubtitle}
-                    onChange={(e) => setShopSubtitle(e.target.value)}
-                    className="w-full px-3 py-2 border border-stone-300 rounded-xl text-xs focus:ring-2 focus:ring-amber-500 bg-white"
-                    placeholder="เช่น ระบบบัญชีรายรับช่างผมประจำร้าน"
-                  />
+                {/* Sub-section: IF ICON / EMOJI */}
+                {logoType === 'icon' && (
+                  <div className="space-y-4 animate-in fade-in duration-150">
+                    <div>
+                      <label className="block text-xs font-bold text-stone-700 mb-1.5">
+                        เลือกไอคอน Emoji ประจำร้าน (คลิกเพื่อเลือกทันที):
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {['✂️', '💈', '🪒', '👑', '💇‍♂️', '💇‍♀️', '⚡', '🦁', '🎩', '🥇', '⭐', '🔥', '🏆', '🧔', '🕶️', '⚜️'].map(
+                          (emoji) => (
+                            <button
+                              key={emoji}
+                              type="button"
+                              onClick={() => setLogoIcon(emoji)}
+                              className={`w-10 h-10 rounded-xl text-lg flex items-center justify-center transition-all cursor-pointer border ${
+                                logoIcon === emoji
+                                  ? 'bg-amber-600 text-white border-amber-600 scale-110 shadow-sm'
+                                  : 'bg-white hover:bg-amber-100/60 border-stone-200 text-stone-800'
+                              }`}
+                            >
+                              {emoji}
+                            </button>
+                          )
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-bold text-stone-700 mb-1">
+                          หรือพิมพ์ไอคอน / อักษรย่อร้านเอง:
+                        </label>
+                        <input
+                          type="text"
+                          value={logoIcon}
+                          maxLength={4}
+                          onChange={(e) => setLogoIcon(e.target.value)}
+                          className="w-full px-3 py-2 bg-white border border-stone-300 rounded-xl text-xs font-bold"
+                          placeholder="เช่น 💈 หรือ B&S"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-stone-700 mb-1">
+                          รูปทรงกรอบโลโก้ (Shape):
+                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setLogoShape('rounded')}
+                            className={`py-2 px-3 text-xs font-bold rounded-xl border flex items-center justify-center gap-1.5 cursor-pointer ${
+                              logoShape === 'rounded'
+                                ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
+                                : 'bg-white border-stone-300 text-stone-700 hover:bg-stone-50'
+                            }`}
+                          >
+                            <span className="w-3.5 h-3.5 rounded-md bg-current opacity-80" />
+                            <span>สี่เหลี่ยมมน</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setLogoShape('circle')}
+                            className={`py-2 px-3 text-xs font-bold rounded-xl border flex items-center justify-center gap-1.5 cursor-pointer ${
+                              logoShape === 'circle'
+                                ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
+                                : 'bg-white border-stone-300 text-stone-700 hover:bg-stone-50'
+                            }`}
+                          >
+                            <span className="w-3.5 h-3.5 rounded-full bg-current opacity-80" />
+                            <span>ทรงวงกลม</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Logo Background Color Palette */}
+                    <div>
+                      <label className="block text-xs font-bold text-stone-700 mb-1.5">
+                        สีพื้นหลังไอคอนโลโก้ (Logo Background Color):
+                      </label>
+                      <div className="flex flex-wrap items-center gap-2">
+                        {[
+                          { label: 'ส้มอำพัน', color: '#ea580c' },
+                          { label: 'ทองคำ', color: '#d97706' },
+                          { label: 'ดำสนิท', color: '#09090b' },
+                          { label: 'เขียวมรกต', color: '#059669' },
+                          { label: 'แดงคลาสสิก', color: '#dc2626' },
+                          { label: 'ฟ้าคราม', color: '#0284c7' },
+                          { label: 'ม่วงรอยัล', color: '#7c3aed' },
+                          { label: 'เทาสเลท', color: '#334155' },
+                        ].map((item) => (
+                          <button
+                            key={item.color}
+                            type="button"
+                            onClick={() => setLogoBgColor(item.color)}
+                            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                              logoBgColor === item.color
+                                ? 'ring-2 ring-amber-500 border-amber-500 scale-105 shadow-xs bg-white'
+                                : 'border-stone-300 bg-white hover:bg-stone-50 text-stone-700'
+                            }`}
+                          >
+                            <span
+                              className="w-3.5 h-3.5 rounded-full shadow-2xs shrink-0"
+                              style={{ backgroundColor: item.color }}
+                            />
+                            <span>{item.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Sub-section: IF IMAGE */}
+                {logoType === 'image' && (
+                  <div className="space-y-4 animate-in fade-in duration-150">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {/* Upload from file */}
+                      <div className="bg-white p-3.5 rounded-xl border border-stone-300 space-y-2">
+                        <label className="block text-xs font-bold text-stone-800">
+                          📁 1. อัปโหลดรูปภาพจากเครื่อง (PNG / JPG / WebP):
+                        </label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleLogoUpload}
+                          className="w-full text-xs text-stone-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-amber-600 file:text-white hover:file:bg-amber-700 cursor-pointer"
+                        />
+                        <p className="text-[11px] text-stone-500">
+                          แนะนำรูปสี่เหลี่ยมจัตุรัส ขนาดไม่เกิน 2MB
+                        </p>
+                      </div>
+
+                      {/* Image URL Input */}
+                      <div className="bg-white p-3.5 rounded-xl border border-stone-300 space-y-2">
+                        <label className="block text-xs font-bold text-stone-800">
+                          🔗 2. หรือวาง URL ลิงก์รูปภาพ:
+                        </label>
+                        <input
+                          type="text"
+                          value={logoImage}
+                          onChange={(e) => setLogoImage(e.target.value)}
+                          placeholder="https://example.com/logo.png"
+                          className="w-full px-3 py-1.5 text-xs bg-stone-50 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                        />
+                        {logoImage && (
+                          <button
+                            type="button"
+                            onClick={() => setLogoImage('')}
+                            className="text-[11px] text-rose-600 hover:text-rose-800 font-bold underline cursor-pointer"
+                          >
+                            ล้างรูปภาพออก
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Preset Sample Logos */}
+                    <div>
+                      <label className="block text-xs font-bold text-stone-700 mb-1.5">
+                        หรือเลือกรูปภาพตัวอย่างโลโก้ร้านตัดผมพรีเมียม (คลิกเพื่อใช้ทันที):
+                      </label>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                        {[
+                          {
+                            name: '💈 Barber Pole Vintage',
+                            url: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=150&h=150&q=80',
+                          },
+                          {
+                            name: '✂️ Gold Vintage Scissors',
+                            url: 'https://images.unsplash.com/photo-1585747860715-2ba37e788b70?auto=format&fit=crop&w=150&h=150&q=80',
+                          },
+                          {
+                            name: '👑 Royal Barber Crest',
+                            url: 'https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&w=150&h=150&q=80',
+                          },
+                          {
+                            name: '🪒 Straight Razor Salon',
+                            url: 'https://images.unsplash.com/photo-1599351431202-1e0f0137899a?auto=format&fit=crop&w=150&h=150&q=80',
+                          },
+                        ].map((preset) => (
+                          <button
+                            key={preset.name}
+                            type="button"
+                            onClick={() => {
+                              setLogoImage(preset.url);
+                              setLogoType('image');
+                            }}
+                            className={`flex flex-col items-center gap-1.5 p-2 rounded-xl border bg-white text-stone-800 text-[11px] font-bold transition-all cursor-pointer hover:border-amber-500 hover:shadow-xs ${
+                              logoImage === preset.url ? 'ring-2 ring-amber-600 border-amber-600' : 'border-stone-200'
+                            }`}
+                          >
+                            <img
+                              src={preset.url}
+                              alt={preset.name}
+                              className="w-12 h-12 rounded-xl object-cover border border-stone-200"
+                            />
+                            <span className="truncate w-full text-center">{preset.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* SECTION B: โหมดพื้นหลังสีดำ & ปรับแต่งธีมระบบ */}
+              <div className="bg-stone-900 text-stone-100 rounded-2xl p-4 md:p-5 border border-stone-800 space-y-4">
+                <div className="flex items-center gap-2 border-b border-stone-800 pb-2">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                    <Moon className="w-4 h-4 text-amber-400 font-bold" />
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-stone-100 text-sm">
+                      2. ปรับแต่งพื้นหลังสีดำ & สีแถบระบบ (Black Background & Themes)
+                    </h4>
+                    <p className="text-xs text-stone-400">
+                      สลับโหมดพื้นหลังสีดำทั้งระบบเพื่อสไตล์บาร์เบอร์วินเทจสุดเท่ และถนอมสายตา
+                    </p>
+                  </div>
                 </div>
 
+                {/* 1. APP BACKGROUND MODE (DARK / BLACK vs LIGHT) */}
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1 flex items-center gap-1">
-                    <Phone className="w-3.5 h-3.5 text-stone-500" />
-                    <span>เบอร์โทรศัพท์ร้าน:</span>
+                  <label className="block text-xs font-bold text-stone-300 mb-2">
+                    โหมดพื้นหลังของแอปพลิเคชัน (App Background Mode):
                   </label>
-                  <input
-                    type="text"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="w-full px-3 py-2 border border-stone-300 rounded-xl text-xs focus:ring-2 focus:ring-amber-500 bg-white font-mono"
-                    placeholder="เช่น 081-234-5678"
-                  />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* Dark / Black Option */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAppBgMode('dark');
+                        if (headerBgColor === '#ffffff') setHeaderBgColor('#1c1917');
+                      }}
+                      className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex items-start gap-3 ${
+                        appBgMode === 'dark'
+                          ? 'bg-stone-950 border-amber-500 ring-2 ring-amber-500/50 text-white shadow-lg'
+                          : 'bg-stone-800/80 border-stone-700 text-stone-300 hover:bg-stone-800'
+                      }`}
+                    >
+                      <div className="w-9 h-9 rounded-xl bg-black border border-stone-700 flex items-center justify-center shrink-0 text-amber-400">
+                        <Moon className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-black text-sm text-stone-100">
+                            ⚫ โหมดพื้นหลังสีดำ (Jet Black)
+                          </span>
+                          <span className="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full font-bold">
+                            ยอดนิยม
+                          </span>
+                        </div>
+                        <p className="text-xs text-stone-400 mt-0.5">
+                          พื้นหลังสีดำสนิท สไตล์ร้านตัดผมโมเดิร์น & วินเทจหรูหรา ถนอมสายตา และตัวเลขเด่นชัดเจน
+                        </p>
+                      </div>
+                    </button>
+
+                    {/* Light Option */}
+                    <button
+                      type="button"
+                      onClick={() => setAppBgMode('light')}
+                      className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex items-start gap-3 ${
+                        appBgMode === 'light'
+                          ? 'bg-stone-800 border-amber-500 ring-2 ring-amber-500/50 text-white shadow-lg'
+                          : 'bg-stone-800/80 border-stone-700 text-stone-300 hover:bg-stone-800'
+                      }`}
+                    >
+                      <div className="w-9 h-9 rounded-xl bg-stone-100 border border-stone-300 flex items-center justify-center shrink-0 text-stone-900">
+                        <Sun className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <span className="font-black text-sm text-stone-100">
+                          ⚪ โหมดพื้นหลังสว่าง (Classic Ivory)
+                        </span>
+                        <p className="text-xs text-stone-400 mt-0.5">
+                          พื้นหลังสีสว่าง สบายตา สไตล์กระดาษตารางบันทึกบัญชีดั้งเดิม
+                        </p>
+                      </div>
+                    </button>
+                  </div>
                 </div>
 
+                {/* 2. HEADER BACKGROUND COLOR PRESETS */}
                 <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1 flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5 text-stone-500" />
-                    <span>เวลาเปิด - ปิดร้าน:</span>
+                  <label className="block text-xs font-bold text-stone-300 mb-1.5">
+                    สีพื้นหลังแถบ Header ด้านบน (Header Background Color):
                   </label>
-                  <input
-                    type="text"
-                    value={openingHours}
-                    onChange={(e) => setOpeningHours(e.target.value)}
-                    className="w-full px-3 py-2 border border-stone-300 rounded-xl text-xs focus:ring-2 focus:ring-amber-500 bg-white"
-                    placeholder="เช่น 10:00 - 20:00 น."
-                  />
+                  <div className="flex flex-wrap items-center gap-2">
+                    {[
+                      { label: '⚫ ดำสนิท (Jet Black)', color: '#000000' },
+                      { label: '🌑 เทาดำเข้ม (Stone Dark)', color: '#1c1917' },
+                      { label: '🔘 ซิงก์เข้ม (Dark Zinc)', color: '#18181b' },
+                      { label: '🌌 มิดไนท์เนวี (Midnight Navy)', color: '#0f172a' },
+                      { label: '⚪ ขาวสว่าง (Ivory White)', color: '#ffffff' },
+                    ].map((item) => (
+                      <button
+                        key={item.color}
+                        type="button"
+                        onClick={() => setHeaderBgColor(item.color)}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                          headerBgColor === item.color
+                            ? 'ring-2 ring-amber-400 border-amber-400 bg-stone-800 text-amber-300 scale-105'
+                            : 'bg-stone-800/80 border-stone-700 text-stone-300 hover:bg-stone-800'
+                        }`}
+                      >
+                        <span
+                          className="w-3.5 h-3.5 rounded-full border border-stone-500 shadow-2xs"
+                          style={{ backgroundColor: item.color }}
+                        />
+                        <span>{item.label}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
-                    สัญลักษณ์สกุลเงิน:
-                  </label>
-                  <input
-                    type="text"
-                    value={currencySymbol}
-                    onChange={(e) => setCurrencySymbol(e.target.value)}
-                    className="w-full px-3 py-2 border border-stone-300 rounded-xl text-xs font-mono font-bold focus:ring-2 focus:ring-amber-500 bg-white"
-                    placeholder="฿ หรือ THB"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-stone-700 mb-1">
-                    โทนสีแบรนด์หลัก (Theme Style):
-                  </label>
-                  <select
-                    value={themeStyle}
-                    onChange={(e: any) => setThemeStyle(e.target.value)}
-                    className="w-full px-3 py-2 border border-stone-300 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-amber-500 bg-white cursor-pointer"
+                {/* 3. BARBER POLE STRIPE TOGGLE */}
+                <div className="flex items-center justify-between bg-stone-950 p-3 rounded-xl border border-stone-800">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">💈</span>
+                    <div>
+                      <div className="text-xs font-bold text-stone-200">
+                        เส้นไฟหมุนบาร์เบอร์โพล (Barber Pole Line) ด้านบนสุด
+                      </div>
+                      <div className="text-[11px] text-stone-400">
+                        แสดงแถบสีแดง ขาว น้ำเงิน สัญลักษณ์ร้านตัดผมที่ขอบบนสุดของจอ
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowBarberPoleStripe(!showBarberPoleStripe)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+                      showBarberPoleStripe
+                        ? 'bg-amber-600 text-white border-amber-500'
+                        : 'bg-stone-800 text-stone-400 border-stone-700'
+                    }`}
                   >
-                    <option value="amber">💈 Vintage Amber & Gold (คลาสสิกบาร์เบอร์)</option>
-                    <option value="slate">✂️ Modern Charcoal Slate (โมเดิร์นซาลอน)</option>
-                    <option value="emerald">🌿 Luxury Emerald Green (หรูหรา)</option>
-                    <option value="crimson">💈 Royal Barber Crimson (แดงบาร์เบอร์โพล)</option>
-                  </select>
+                    {showBarberPoleStripe ? '✓ เปิดใช้งาน' : '✕ ปิด'}
+                  </button>
+                </div>
+              </div>
+
+              {/* SECTION C: ข้อมูลร้านตัดผมพื้นฐาน (Basic Shop Info) */}
+              <div className="bg-white rounded-2xl p-4 md:p-5 border border-stone-200 shadow-xs space-y-4">
+                <div className="border-b border-stone-200 pb-2 flex items-center gap-2">
+                  <Store className="w-4 h-4 text-amber-600" />
+                  <h4 className="font-extrabold text-stone-900 text-sm">
+                    3. ข้อมูลร้านตัดผมทั่วไป (Shop Information)
+                  </h4>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-stone-700 mb-1">
+                      ชื่อร้าน (Shop Name):
+                    </label>
+                    <input
+                      type="text"
+                      value={shopName}
+                      onChange={(e) => setShopName(e.target.value)}
+                      className="w-full px-3 py-2 border border-stone-300 rounded-xl text-xs font-bold focus:ring-2 focus:ring-amber-500 bg-white"
+                      placeholder="เช่น VINTAGE BARBER & SALON"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-stone-700 mb-1">
+                      คำอธิบาย / สโลแกนร้าน:
+                    </label>
+                    <input
+                      type="text"
+                      value={shopSubtitle}
+                      onChange={(e) => setShopSubtitle(e.target.value)}
+                      className="w-full px-3 py-2 border border-stone-300 rounded-xl text-xs focus:ring-2 focus:ring-amber-500 bg-white"
+                      placeholder="เช่น ระบบบัญชีรายรับช่างผมประจำร้าน"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-stone-700 mb-1 flex items-center gap-1">
+                      <Phone className="w-3.5 h-3.5 text-stone-500" />
+                      <span>เบอร์โทรศัพท์ร้าน:</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="w-full px-3 py-2 border border-stone-300 rounded-xl text-xs focus:ring-2 focus:ring-amber-500 bg-white font-mono"
+                      placeholder="เช่น 081-234-5678"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-stone-700 mb-1 flex items-center gap-1">
+                      <Clock className="w-3.5 h-3.5 text-stone-500" />
+                      <span>เวลาเปิด - ปิดร้าน:</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={openingHours}
+                      onChange={(e) => setOpeningHours(e.target.value)}
+                      className="w-full px-3 py-2 border border-stone-300 rounded-xl text-xs focus:ring-2 focus:ring-amber-500 bg-white"
+                      placeholder="เช่น 10:00 - 20:00 น."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-stone-700 mb-1">
+                      สัญลักษณ์สกุลเงิน:
+                    </label>
+                    <input
+                      type="text"
+                      value={currencySymbol}
+                      onChange={(e) => setCurrencySymbol(e.target.value)}
+                      className="w-full px-3 py-2 border border-stone-300 rounded-xl text-xs font-mono font-bold focus:ring-2 focus:ring-amber-500 bg-white"
+                      placeholder="฿ หรือ THB"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-stone-700 mb-1">
+                      โทนสีแบรนด์หลัก (Theme Accent Style):
+                    </label>
+                    <select
+                      value={themeStyle}
+                      onChange={(e: any) => setThemeStyle(e.target.value)}
+                      className="w-full px-3 py-2 border border-stone-300 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-amber-500 bg-white cursor-pointer"
+                    >
+                      <option value="amber">💈 Vintage Amber & Gold (คลาสสิกบาร์เบอร์)</option>
+                      <option value="slate">✂️ Modern Charcoal Slate (โมเดิร์นซาลอน)</option>
+                      <option value="emerald">🌿 Luxury Emerald Green (หรูหรา)</option>
+                      <option value="crimson">💈 Royal Barber Crimson (แดงบาร์เบอร์โพล)</option>
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>

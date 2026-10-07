@@ -265,8 +265,23 @@ export default function App() {
     showToast('ล้างข้อมูลเรียบร้อยแล้ว พร้อมเริ่มบันทึกใช้งานจริง', 'info');
   };
 
+  // Toggle Dark Mode / Black Background
+  const handleToggleDarkMode = () => {
+    const nextMode = settings.appBgMode === 'dark' ? 'light' : 'dark';
+    setSettings((prev) => ({
+      ...prev,
+      appBgMode: nextMode,
+    }));
+    showToast(
+      nextMode === 'dark'
+        ? 'เปลี่ยนเป็นโหมดพื้นหลังสีดำ (Jet Black) เรียบร้อย'
+        : 'เปลี่ยนเป็นโหมดสว่าง (Light Mode) เรียบร้อย'
+    );
+  };
+
   const tech1Name = settings.tech1Name || 'ช่างบอม (Barber)';
   const tech2Name = settings.tech2Name || 'ช่างต๋อง (Stylist)';
+  const isDarkMode = settings.appBgMode === 'dark';
 
   // If not authenticated, force the Login Screen!
   if (!isAuthenticated) {
@@ -287,7 +302,11 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-100/90 text-stone-900 flex flex-col font-sans">
+    <div
+      className={`min-h-screen flex flex-col font-sans transition-colors duration-200 ${
+        isDarkMode ? 'bg-[#09090b] text-stone-100' : 'bg-stone-100/90 text-stone-900'
+      }`}
+    >
       {/* Toast Notification */}
       {toast && (
         <div className="fixed top-20 right-4 z-50 animate-in slide-in-from-top-2 duration-200">
@@ -324,6 +343,7 @@ export default function App() {
         onOpenSheetsModal={() => setIsSheetsModalOpen(true)}
         onOpenAppsScriptModal={() => setIsAppsScriptModalOpen(true)}
         isSheetsConnected={isGoogleSignedIn && !!settings.sheetConfig.spreadsheetId}
+        onToggleDarkMode={handleToggleDarkMode}
       />
 
       {/* Security Status Banner */}
@@ -381,6 +401,7 @@ export default function App() {
             onExportCSV={() => handleExportCSV('tech1')}
             onOpenSyncModal={() => setIsSheetsModalOpen(true)}
             isSheetsConnected={isGoogleSignedIn && !!settings.sheetConfig.spreadsheetId}
+            isDarkMode={isDarkMode}
           />
         )}
 
@@ -397,6 +418,7 @@ export default function App() {
             onExportCSV={() => handleExportCSV('tech2')}
             onOpenSyncModal={() => setIsSheetsModalOpen(true)}
             isSheetsConnected={isGoogleSignedIn && !!settings.sheetConfig.spreadsheetId}
+            isDarkMode={isDarkMode}
           />
         )}
 
@@ -415,6 +437,7 @@ export default function App() {
                 onExportCSV={() => handleExportCSV('tech1')}
                 onOpenSyncModal={() => setIsSheetsModalOpen(true)}
                 isSheetsConnected={isGoogleSignedIn && !!settings.sheetConfig.spreadsheetId}
+                isDarkMode={isDarkMode}
               />
             )}
 
@@ -431,6 +454,7 @@ export default function App() {
                 onExportCSV={() => handleExportCSV('tech2')}
                 onOpenSyncModal={() => setIsSheetsModalOpen(true)}
                 isSheetsConnected={isGoogleSignedIn && !!settings.sheetConfig.spreadsheetId}
+                isDarkMode={isDarkMode}
               />
             )}
 
@@ -439,6 +463,7 @@ export default function App() {
                 records={records}
                 settings={settings}
                 onSelectTechnician={(id) => setActiveTab(id)}
+                isDarkMode={isDarkMode}
               />
             )}
           </>

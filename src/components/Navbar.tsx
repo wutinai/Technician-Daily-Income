@@ -10,6 +10,9 @@ import {
   Lock,
   LogOut,
   UserCheck,
+  Moon,
+  Sun,
+  Palette,
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -23,6 +26,7 @@ interface NavbarProps {
   onOpenSheetsModal: () => void;
   onOpenAppsScriptModal: () => void;
   isSheetsConnected: boolean;
+  onToggleDarkMode?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -36,33 +40,82 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenSheetsModal,
   onOpenAppsScriptModal,
   isSheetsConnected,
+  onToggleDarkMode,
 }) => {
   const tech1Name = settings.tech1Name || 'ช่างบอม (Barber)';
   const tech2Name = settings.tech2Name || 'ช่างต๋อง (Stylist)';
   const isAdmin = currentRole === 'admin';
 
+  const isHeaderLight = settings.headerTextColor === 'dark';
+  const headerBg = settings.headerBgColor || '#1c1917';
+  const logoShapeClass = settings.logoShape === 'circle' ? 'rounded-full' : 'rounded-2xl';
+  const isDarkMode = settings.appBgMode === 'dark';
+
   return (
-    <header className="bg-stone-900 border-b border-stone-800 text-stone-100 sticky top-0 z-40 shadow-md">
-      {/* Subtle Barber Pole Stripe Line at top */}
-      <div className="h-1 w-full bg-gradient-to-r from-red-600 via-white via-blue-600 via-white to-red-600 opacity-80" />
+    <header
+      style={{ backgroundColor: headerBg }}
+      className={`border-b sticky top-0 z-40 shadow-md transition-colors ${
+        isHeaderLight ? 'border-stone-200 text-stone-900' : 'border-stone-800 text-stone-100'
+      }`}
+    >
+      {/* Optional Barber Pole Stripe Line at top */}
+      {settings.showBarberPoleStripe !== false && (
+        <div className="h-1 w-full bg-gradient-to-r from-red-600 via-white via-blue-600 via-white to-red-600 opacity-80" />
+      )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-2">
-          {/* Logo & Barbershop Branding */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 via-amber-600 to-orange-600 flex items-center justify-center text-stone-950 shadow-md shrink-0 border border-amber-400/40">
-              <Scissors className="w-5 h-5 text-stone-950 font-bold" />
+          {/* Logo & Barbershop Branding (Clickable for Admin to change logo/background) */}
+          <div
+            onClick={isAdmin ? onOpenSettings : undefined}
+            className={`flex items-center gap-3 select-none ${
+              isAdmin ? 'cursor-pointer group' : ''
+            }`}
+            title={isAdmin ? 'คลิกเพื่อแก้ไขโลโก้และสีพื้นหลังร้าน' : settings.shopName}
+          >
+            {/* Logo Display: Custom Image OR Icon */}
+            <div className="relative">
+              {settings.logoType === 'image' && settings.logoImage ? (
+                <img
+                  src={settings.logoImage}
+                  alt={settings.shopName || 'Shop Logo'}
+                  className={`w-11 h-11 object-cover ${logoShapeClass} shadow-md shrink-0 border-2 border-amber-400/50 group-hover:scale-105 transition-transform bg-stone-900`}
+                />
+              ) : (
+                <div
+                  style={{ backgroundColor: settings.logoBgColor || '#ea580c' }}
+                  className={`w-11 h-11 ${logoShapeClass} flex items-center justify-center text-stone-950 shadow-md shrink-0 border border-white/30 text-xl font-bold group-hover:scale-105 transition-transform`}
+                >
+                  {settings.logoIcon || <Scissors className="w-5 h-5 text-stone-950 font-bold" />}
+                </div>
+              )}
+
+              {/* Edit Indicator for Admin */}
+              {isAdmin && (
+                <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-amber-500 text-stone-950 rounded-full text-[9px] flex items-center justify-center font-bold border border-stone-900 shadow-xs opacity-80 group-hover:opacity-100">
+                  ✏️
+                </span>
+              )}
             </div>
+
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-black text-stone-100 text-base md:text-lg tracking-tight font-sans">
+                <span
+                  className={`font-black text-base md:text-lg tracking-tight font-sans transition-colors ${
+                    isHeaderLight ? 'text-stone-900' : 'text-stone-100'
+                  }`}
+                >
                   {settings.shopName || 'BARBER & SALON'}
                 </span>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 font-bold font-mono">
                   {isAdmin ? 'Admin Mode' : 'Barber Mode'}
                 </span>
               </div>
-              <p className="text-[11px] text-stone-400 hidden md:block">
+              <p
+                className={`text-[11px] hidden md:block transition-colors ${
+                  isHeaderLight ? 'text-stone-600' : 'text-stone-400'
+                }`}
+              >
                 {settings.shopSubtitle || 'ระบบบัญชีรายรับช่างผม • แยก 2 ชีท Google Sheets อัตโนมัติ'}
               </p>
             </div>
@@ -103,12 +156,37 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             )}
 
+            {/* Quick Dark Mode / Black Background Toggle Button */}
+            {onToggleDarkMode && (
+              <button
+                onClick={onToggleDarkMode}
+                className={`p-2 rounded-xl border transition-all cursor-pointer flex items-center gap-1.5 ${
+                  isDarkMode
+                    ? 'bg-amber-400/20 text-amber-300 border-amber-500/50 hover:bg-amber-400/30 shadow-xs'
+                    : 'bg-stone-800 text-stone-300 border-stone-700 hover:text-white hover:bg-stone-700'
+                }`}
+                title={isDarkMode ? 'คลิกเพื่อเปลี่ยนเป็นโหมดสว่าง' : 'คลิกเพื่อเปลี่ยนเป็นโหมดพื้นหลังสีดำ (Black Mode)'}
+              >
+                {isDarkMode ? (
+                  <>
+                    <Sun className="w-4 h-4 text-amber-300" />
+                    <span className="text-[11px] font-bold hidden xl:inline">โหมดดำเปิดอยู่</span>
+                  </>
+                ) : (
+                  <>
+                    <Moon className="w-4 h-4 text-amber-400" />
+                    <span className="text-[11px] font-bold hidden xl:inline">พื้นหลังสีดำ</span>
+                  </>
+                )}
+              </button>
+            )}
+
             {/* Admin Settings Button - Visible ONLY to Admin */}
             {isAdmin && (
               <button
                 onClick={onOpenSettings}
                 className="p-2 rounded-xl text-stone-400 hover:text-white hover:bg-stone-800 border border-stone-700/80 transition-colors cursor-pointer"
-                title="ตั้งค่าระบบและชื่อช่างผม"
+                title="ตั้งค่าระบบ, โลโก้, พื้นหลังสีดำ และชื่อช่างผม"
               >
                 <Settings className="w-4 h-4" />
               </button>

@@ -58,6 +58,17 @@ export interface AppSettings {
   openingHours?: string;
   themeStyle: 'amber' | 'slate' | 'emerald' | 'crimson';
 
+  // Logo & Header Styling
+  logoType?: 'icon' | 'image';
+  logoImage?: string; // base64 or URL
+  logoIcon?: string; // emoji e.g. '✂️', '💈', '🪒', '👑', '💇‍♂️', '⚡', '🦁', '🎩'
+  logoBgColor?: string; // e.g. '#ea580c'
+  logoShape?: 'circle' | 'rounded'; // 'circle' or 'rounded'
+  headerBgColor?: string; // e.g. '#1c1917', '#000000', '#18181b', '#0f172a', '#ffffff'
+  headerTextColor?: 'light' | 'dark'; // text tone based on header brightness
+  appBgMode?: 'dark' | 'light'; // dark theme vs light theme for whole app
+  showBarberPoleStripe?: boolean; // top stripe toggle
+
   // 2. Technicians Info & Commission
   tech1Name: string;
   tech1Role: string;

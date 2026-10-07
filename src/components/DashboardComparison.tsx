@@ -21,12 +21,14 @@ interface DashboardComparisonProps {
   records: IncomeRecord[];
   settings: AppSettings;
   onSelectTechnician: (techId: 'tech1' | 'tech2') => void;
+  isDarkMode?: boolean;
 }
 
 export const DashboardComparison: React.FC<DashboardComparisonProps> = ({
   records,
   settings,
   onSelectTechnician,
+  isDarkMode = false,
 }) => {
   const [selectedPeriod, setSelectedPeriod] = useState<'page1' | 'page2' | 'all'>('page1');
 
@@ -184,7 +186,11 @@ export const DashboardComparison: React.FC<DashboardComparisonProps> = ({
       </div>
 
       {/* Period Selection Bar */}
-      <div className="bg-white rounded-2xl p-2.5 border border-stone-300 shadow-xs flex items-center justify-between flex-wrap gap-2">
+      <div
+        className={`rounded-2xl p-2.5 border shadow-xs flex items-center justify-between flex-wrap gap-2 transition-colors ${
+          isDarkMode ? 'bg-stone-900 border-stone-800' : 'bg-white border-stone-300'
+        }`}
+      >
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -192,6 +198,8 @@ export const DashboardComparison: React.FC<DashboardComparisonProps> = ({
             className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer flex items-center gap-1.5 ${
               selectedPeriod === 'page1'
                 ? 'bg-amber-600 text-white shadow-md'
+                : isDarkMode
+                ? 'bg-stone-800 hover:bg-stone-700 text-stone-300'
                 : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
             }`}
           >
@@ -204,7 +212,9 @@ export const DashboardComparison: React.FC<DashboardComparisonProps> = ({
             onClick={() => setSelectedPeriod('page2')}
             className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer flex items-center gap-1.5 ${
               selectedPeriod === 'page2'
-                ? 'bg-stone-850 text-amber-300 shadow-md border border-amber-500/40'
+                ? 'bg-stone-950 text-amber-300 shadow-md border border-amber-500/40'
+                : isDarkMode
+                ? 'bg-stone-800 hover:bg-stone-700 text-stone-300'
                 : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
             }`}
           >
@@ -218,6 +228,8 @@ export const DashboardComparison: React.FC<DashboardComparisonProps> = ({
             className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
               selectedPeriod === 'all'
                 ? 'bg-indigo-600 text-white shadow-xs'
+                : isDarkMode
+                ? 'text-stone-400 hover:bg-stone-800'
                 : 'text-stone-500 hover:bg-stone-100'
             }`}
           >
@@ -225,8 +237,8 @@ export const DashboardComparison: React.FC<DashboardComparisonProps> = ({
           </button>
         </div>
 
-        <div className="text-xs text-stone-600">
-          ยอดรวมทั้งเดือน: <strong className="text-stone-900 font-mono">฿{fullMonthGrand.toLocaleString()}</strong>
+        <div className={`text-xs ${isDarkMode ? 'text-stone-400' : 'text-stone-600'}`}>
+          ยอดรวมทั้งเดือน: <strong className={`font-mono ${isDarkMode ? 'text-amber-300' : 'text-stone-900'}`}>฿{fullMonthGrand.toLocaleString()}</strong>
         </div>
       </div>
 

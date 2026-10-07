@@ -24,6 +24,16 @@ export const DEFAULT_SETTINGS: AppSettings = {
   openingHours: '10:00 - 20:00 น.',
   themeStyle: 'amber',
 
+  logoType: 'icon',
+  logoImage: '',
+  logoIcon: '✂️',
+  logoBgColor: '#ea580c',
+  logoShape: 'rounded',
+  headerBgColor: '#1c1917',
+  headerTextColor: 'light',
+  appBgMode: 'light',
+  showBarberPoleStripe: true,
+
   tech1Name: 'ช่างบอม (Barber)',
   tech1Role: 'Master Barber',
   tech1Commission: 50,

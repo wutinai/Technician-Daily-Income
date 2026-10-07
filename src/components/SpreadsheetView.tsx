@@ -39,6 +39,7 @@ interface SpreadsheetViewProps {
   onExportCSV: () => void;
   onOpenSyncModal: () => void;
   isSheetsConnected: boolean;
+  isDarkMode?: boolean;
 }
 
 type PeriodType = 'page1' | 'page2'; // หน้าที่ 1: วันที่ 1 - 15, หน้าที่ 2: วันที่ 16 - 31
@@ -54,6 +55,7 @@ export const SpreadsheetView: React.FC<SpreadsheetViewProps> = ({
   onExportCSV,
   onOpenSyncModal,
   isSheetsConnected,
+  isDarkMode = false,
 }) => {
   // Page / Period State: 'page1' (1-15), 'page2' (16-31), or 'all'
   const [activePage, setActivePage] = useState<PeriodType>('page1');
@@ -254,30 +256,44 @@ export const SpreadsheetView: React.FC<SpreadsheetViewProps> = ({
   return (
     <div className="space-y-4">
       {/* Top Barbershop Toolbar */}
-      <div className="bg-white rounded-2xl shadow-sm border border-stone-200/90 p-3.5 md:p-4 flex flex-wrap items-center justify-between gap-3">
+      <div
+        className={`rounded-2xl shadow-sm border p-3.5 md:p-4 flex flex-wrap items-center justify-between gap-3 transition-colors ${
+          isDarkMode
+            ? 'bg-stone-900 border-stone-800 text-stone-100 shadow-md'
+            : 'bg-white border-stone-200/90 text-stone-900 shadow-sm'
+        }`}
+      >
         <div className="flex items-center flex-wrap gap-2.5">
           {/* Month Filter */}
-          <div className="flex items-center gap-1.5 bg-stone-100/90 px-3 py-1.5 rounded-xl border border-stone-200 text-xs md:text-sm font-medium text-stone-700">
-            <Filter className="w-4 h-4 text-amber-700" />
+          <div
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs md:text-sm font-medium ${
+              isDarkMode
+                ? 'bg-stone-950 border-stone-800 text-stone-200'
+                : 'bg-stone-100/90 border-stone-200 text-stone-700'
+            }`}
+          >
+            <Filter className="w-4 h-4 text-amber-500" />
             <span>เดือน:</span>
             <select
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
-              className="bg-transparent border-none text-xs md:text-sm font-bold text-stone-900 focus:outline-none cursor-pointer"
+              className={`bg-transparent border-none text-xs md:text-sm font-bold focus:outline-none cursor-pointer ${
+                isDarkMode ? 'text-amber-300' : 'text-stone-900'
+              }`}
             >
-              <option value="1">มกราคม 2026</option>
-              <option value="2">กุมภาพันธ์ 2026</option>
-              <option value="3">มีนาคม 2026</option>
-              <option value="4">เมษายน 2026</option>
-              <option value="5">พฤษภาคม 2026</option>
-              <option value="6">มิถุนายน 2026</option>
-              <option value="7">กรกฎาคม 2026</option>
-              <option value="8">สิงหาคม 2026</option>
-              <option value="9">กันยายน 2026</option>
-              <option value="10">ตุลาคม 2026</option>
-              <option value="11">พฤศจิกายน 2026</option>
-              <option value="12">ธันวาคม 2026</option>
-              <option value="all">ทั้งปี (All)</option>
+              <option value="1" className={isDarkMode ? 'bg-stone-900 text-white' : ''}>มกราคม 2026</option>
+              <option value="2" className={isDarkMode ? 'bg-stone-900 text-white' : ''}>กุมภาพันธ์ 2026</option>
+              <option value="3" className={isDarkMode ? 'bg-stone-900 text-white' : ''}>มีนาคม 2026</option>
+              <option value="4" className={isDarkMode ? 'bg-stone-900 text-white' : ''}>เมษายน 2026</option>
+              <option value="5" className={isDarkMode ? 'bg-stone-900 text-white' : ''}>พฤษภาคม 2026</option>
+              <option value="6" className={isDarkMode ? 'bg-stone-900 text-white' : ''}>มิถุนายน 2026</option>
+              <option value="7" className={isDarkMode ? 'bg-stone-900 text-white' : ''}>กรกฎาคม 2026</option>
+              <option value="8" className={isDarkMode ? 'bg-stone-900 text-white' : ''}>สิงหาคม 2026</option>
+              <option value="9" className={isDarkMode ? 'bg-stone-900 text-white' : ''}>กันยายน 2026</option>
+              <option value="10" className={isDarkMode ? 'bg-stone-900 text-white' : ''}>ตุลาคม 2026</option>
+              <option value="11" className={isDarkMode ? 'bg-stone-900 text-white' : ''}>พฤศจิกายน 2026</option>
+              <option value="12" className={isDarkMode ? 'bg-stone-900 text-white' : ''}>ธันวาคม 2026</option>
+              <option value="all" className={isDarkMode ? 'bg-stone-900 text-white' : ''}>ทั้งปี (All)</option>
             </select>
           </div>
 
@@ -289,17 +305,29 @@ export const SpreadsheetView: React.FC<SpreadsheetViewProps> = ({
               placeholder="ค้นหาวันที่, บริการ..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 pr-3 py-1.5 rounded-xl border border-stone-200 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 bg-stone-50/50 w-32 md:w-48"
+              className={`pl-8 pr-3 py-1.5 rounded-xl border text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 w-32 md:w-48 ${
+                isDarkMode
+                  ? 'bg-stone-950 border-stone-800 text-stone-100 placeholder:text-stone-500'
+                  : 'bg-stone-50/50 border-stone-200 text-stone-900'
+              }`}
             />
           </div>
 
           {/* View Mode Toggle: Spreadsheet vs Cards */}
-          <div className="inline-flex rounded-xl border border-stone-200 p-0.5 bg-stone-100 text-xs">
+          <div
+            className={`inline-flex rounded-xl border p-0.5 text-xs ${
+              isDarkMode ? 'bg-stone-950 border-stone-800' : 'bg-stone-100 border-stone-200'
+            }`}
+          >
             <button
               onClick={() => setViewMode('sheet')}
               className={`flex items-center gap-1 px-3 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
                 viewMode === 'sheet'
-                  ? 'bg-white shadow-xs text-stone-900'
+                  ? isDarkMode
+                    ? 'bg-stone-800 shadow-xs text-amber-300'
+                    : 'bg-white shadow-xs text-stone-900'
+                  : isDarkMode
+                  ? 'text-stone-400 hover:text-stone-200'
                   : 'text-stone-500 hover:text-stone-800'
               }`}
             >
@@ -310,7 +338,11 @@ export const SpreadsheetView: React.FC<SpreadsheetViewProps> = ({
               onClick={() => setViewMode('cards')}
               className={`flex items-center gap-1 px-3 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
                 viewMode === 'cards'
-                  ? 'bg-white shadow-xs text-stone-900'
+                  ? isDarkMode
+                    ? 'bg-stone-800 shadow-xs text-amber-300'
+                    : 'bg-white shadow-xs text-stone-900'
+                  : isDarkMode
+                  ? 'text-stone-400 hover:text-stone-200'
                   : 'text-stone-500 hover:text-stone-800'
               }`}
             >
@@ -324,10 +356,14 @@ export const SpreadsheetView: React.FC<SpreadsheetViewProps> = ({
         <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={onExportCSV}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-300 hover:bg-stone-50 text-stone-700 text-xs md:text-sm font-semibold transition-colors cursor-pointer shadow-2xs"
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs md:text-sm font-semibold transition-colors cursor-pointer shadow-2xs ${
+              isDarkMode
+                ? 'border-stone-700 bg-stone-800 hover:bg-stone-700 text-stone-200'
+                : 'border-stone-300 hover:bg-stone-50 text-stone-700'
+            }`}
             title="ส่งออกไฟล์ CSV สำหรับร้านตัดผม"
           >
-            <Download className="w-4 h-4 text-emerald-600" />
+            <Download className="w-4 h-4 text-emerald-400" />
             <span>ส่งออก CSV</span>
           </button>
 
@@ -335,11 +371,15 @@ export const SpreadsheetView: React.FC<SpreadsheetViewProps> = ({
             onClick={onOpenSyncModal}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs md:text-sm font-semibold transition-colors cursor-pointer shadow-2xs ${
               isSheetsConnected
-                ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100'
+                ? isDarkMode
+                  ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-700 hover:bg-emerald-900'
+                  : 'bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100'
+                : isDarkMode
+                ? 'bg-stone-800 text-stone-300 border border-stone-700 hover:bg-stone-750'
                 : 'bg-stone-100 text-stone-700 border border-stone-300 hover:bg-stone-200'
             }`}
           >
-            <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+            <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
             <span>Google Sheets</span>
           </button>
 
@@ -357,7 +397,11 @@ export const SpreadsheetView: React.FC<SpreadsheetViewProps> = ({
       </div>
 
       {/* 2-PAGE PERIOD SWITCHER (หน้าที่ 1: วันที่ 1 - 15 vs หน้าที่ 2: วันที่ 16 - 31) */}
-      <div className="bg-white rounded-2xl p-2.5 md:p-3 border border-stone-300 shadow-xs flex flex-wrap items-center justify-between gap-2.5">
+      <div
+        className={`rounded-2xl p-2.5 md:p-3 border shadow-xs flex flex-wrap items-center justify-between gap-2.5 transition-colors ${
+          isDarkMode ? 'bg-stone-900 border-stone-800' : 'bg-white border-stone-300'
+        }`}
+      >
         <div className="flex items-center gap-2 flex-wrap">
           {/* Page 1 Button: วันที่ 1 - 15 */}
           <button
@@ -366,6 +410,8 @@ export const SpreadsheetView: React.FC<SpreadsheetViewProps> = ({
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer ${
               activePage === 'page1'
                 ? 'bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-md ring-2 ring-amber-500/40'
+                : isDarkMode
+                ? 'bg-stone-800 hover:bg-stone-700 text-stone-300'
                 : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
             }`}
           >
@@ -373,7 +419,11 @@ export const SpreadsheetView: React.FC<SpreadsheetViewProps> = ({
             <span>หน้าที่ 1 : วันที่ 1 - 15</span>
             <span
               className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold font-mono ${
-                activePage === 'page1' ? 'bg-amber-900 text-amber-200' : 'bg-stone-200 text-stone-700'
+                activePage === 'page1'
+                  ? 'bg-amber-900 text-amber-200'
+                  : isDarkMode
+                  ? 'bg-stone-900 text-stone-400'
+                  : 'bg-stone-200 text-stone-700'
               }`}
             >
               ⭐ สรุปยอดวันที่ 15
@@ -387,6 +437,8 @@ export const SpreadsheetView: React.FC<SpreadsheetViewProps> = ({
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer ${
               activePage === 'page2'
                 ? 'bg-gradient-to-r from-stone-900 to-stone-950 text-amber-300 shadow-md ring-2 ring-stone-700 border border-amber-500/40'
+                : isDarkMode
+                ? 'bg-stone-800 hover:bg-stone-700 text-stone-300'
                 : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
             }`}
           >
@@ -396,6 +448,8 @@ export const SpreadsheetView: React.FC<SpreadsheetViewProps> = ({
               className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold font-mono ${
                 activePage === 'page2'
                   ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40'
+                  : isDarkMode
+                  ? 'bg-stone-900 text-stone-400'
                   : 'bg-stone-200 text-stone-700'
               }`}
             >
@@ -409,18 +463,26 @@ export const SpreadsheetView: React.FC<SpreadsheetViewProps> = ({
           {activePage === 'page1' ? (
             <button
               onClick={() => setActivePage('page2')}
-              className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-amber-50 to-stone-100 hover:from-amber-100 hover:to-stone-200 text-stone-900 text-xs font-bold rounded-xl transition-all cursor-pointer border border-amber-300 shadow-2xs"
+              className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer border shadow-2xs ${
+                isDarkMode
+                  ? 'bg-stone-800 hover:bg-stone-700 text-amber-300 border-amber-500/40'
+                  : 'bg-gradient-to-r from-amber-50 to-stone-100 hover:from-amber-100 hover:to-stone-200 text-stone-900 border-amber-300'
+              }`}
             >
               <span>ไปหน้าที่ 2 (วันที่ 16 - 31)</span>
-              <ArrowRight className="w-4 h-4 text-amber-700" />
+              <ArrowRight className="w-4 h-4 text-amber-500" />
             </button>
           ) : (
             <button
               onClick={() => setActivePage('page1')}
-              className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-amber-50 to-stone-100 hover:from-amber-100 hover:to-stone-200 text-stone-900 text-xs font-bold rounded-xl transition-all cursor-pointer border border-amber-300 shadow-2xs"
+              className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer border shadow-2xs ${
+                isDarkMode
+                  ? 'bg-stone-800 hover:bg-stone-700 text-amber-300 border-amber-500/40'
+                  : 'bg-gradient-to-r from-amber-50 to-stone-100 hover:from-amber-100 hover:to-stone-200 text-stone-900 border-amber-300'
+              }`}
             >
-              <ArrowLeft className="w-4 h-4 text-amber-700" />
-              <span>กลับไปหน้าที่ 1 (วันที่ 1 - 15)</span>
+              <ArrowLeft className="w-4 h-4 text-amber-500" />
+              <span>ย้อนกลับไปหน้าที่ 1 (วันที่ 1 - 15)</span>
             </button>
           )}
         </div>
